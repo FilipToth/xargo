@@ -115,9 +115,13 @@ version = "0.0.0"
         }
 
         // rust-src comes with a lockfile for libstd. Use it.
-        let src_parent = src.path().parent().map(Path::to_path_buf).unwrap_or_else(|| src.path().join(".."));
-        let lockfile = src_parent.join("Cargo.lock");
+        let lockfile = src.path().join("Cargo.lock"); // filip's edit: do .join(library)?
         let target_lockfile = td.join("Cargo.lock");
+
+        // println!("src-parent: {:?}", src_parent);
+        // println!("src-parent/..: {:?}", src_parent.join(".."));
+        // println!("lockfile: {:?}", lockfile);
+
         fs::copy(lockfile, &target_lockfile).chain_err(|| "Cargo.lock file is missing from source dir")?;
 
         let mut perms = fs::metadata(&target_lockfile)
@@ -138,6 +142,7 @@ version = "0.0.0"
             if verbose {
                 writeln!(io::stderr(), "+ RUSTFLAGS={}", flags).ok();
             }
+
             cmd.env("CARGO_ENCODED_RUSTFLAGS", flags.encode(home));
 
             // Since we currently don't want to respect `.cargo/config` or `CARGO_TARGET_DIR`,
